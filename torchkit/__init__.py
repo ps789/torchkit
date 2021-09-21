@@ -1,2 +1,2 @@
-import nn
-import flows
+import .nn
+import .flows
