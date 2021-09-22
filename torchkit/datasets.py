@@ -21,7 +21,7 @@ def load_bmnist_image(root='dataset'):
     droot = root+'/'+'bmnist'
     
     if not os.path.exists('{}/binarized_mnist_train.amat'.format(droot)):
-        from downloader import download_bmnist
+        from torchkit.downloader import download_bmnist
         download_bmnist(droot)
     
     # Larochelle 2011
@@ -41,7 +41,7 @@ def load_mnist_image(root='dataset',n_validation=1345, state=123):
     droot = root+'/'+'bmnist'
     
     if not os.path.exists('{}/train-images-idx3-ubyte'.format(droot)):
-        from downloader import download_bmnist
+        from torchkit.downloader import download_bmnist
         download_bmnist(droot)
     
     path_tr = '{}/train-images-idx3-ubyte'.format(droot)
@@ -57,7 +57,7 @@ def load_cifar10_image(root='dataset',labels=False):
     droot = root+'/'+'cifar10'
     
     if not os.path.exists('{}/cifar10.pkl'.format(droot)):
-        from downloader import download_cifar10
+        from torchkit.downloader import download_cifar10
         download_cifar10(droot)
     
     f = lambda d:d.astype(floatX)
@@ -82,7 +82,7 @@ def load_omniglot_image(root='dataset',n_validation=1345, state=123):
     droot = root+'/'+'omniglot'
     
     if not os.path.exists('{}/omniglot.amat'.format(droot)):
-        from downloader import download_omniglot
+        from torchkit.downloader import download_omniglot
         download_omniglot(droot)
     
     
@@ -115,7 +115,7 @@ def load_caltech101_image(root='dataset'):
     fn = 'caltech101_silhouettes_28_split1.mat'
     
     if not os.path.exists('{}/{}'.format(droot, fn)):
-        from downloader import download_caltech101
+        from torchkit.downloader import download_caltech101
         download_caltech101(droot)
     
     ds = scipy.io.loadmat('{}/{}'.format(droot, fn))

@@ -7,7 +7,7 @@ Created on Thu Jan 25 00:00:37 2018
 """
 
 import torch
-from nn import logit
+from torchkit.nn import logit
 
 
 class binarize(object):

@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 from torch.nn import Module
 
-import nn as nn_
+import torchkit.nn as nn_
 
 from functools import reduce
 

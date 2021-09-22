@@ -9,7 +9,7 @@ Created on Fri Jan 26 02:04:29 2018
 
 
 import numpy as np
-import utils
+from torchkit import utils
 
 import torch
 import torch.optim as optim
@@ -17,8 +17,8 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-import nn as nn_
-import iaf_modules
+import torchkit.nn as nn_
+from torchkit import iaf_modules
 #import matplotlib.pyplot as plt
 import os
 import scipy.misc

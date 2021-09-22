@@ -9,8 +9,8 @@ Created on Fri Aug 24 20:29:04 2018
 
 
 
-from flows import BaseFlow
-from nn import SequentialFlow
+from torchkit.flows import BaseFlow
+from torchkit.nn import SequentialFlow
 
 def mollify(flows, mm=0.0):
     if isinstance(flows, BaseFlow):

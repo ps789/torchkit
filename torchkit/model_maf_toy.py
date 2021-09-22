@@ -14,9 +14,9 @@ import numpy as np
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
-import nn as nn_
-import flows
-import utils
+import torchkit.nn as nn_
+from torchkit import flows
+from torchkit import utils
 import matplotlib.pyplot as plt
 
 

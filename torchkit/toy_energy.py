@@ -12,7 +12,7 @@ log-density (negative energy)
 """
 
 import torch as T
-from utils import log_normal, varify
+from torchkit.utils import log_normal, varify
 
 import torch
 cuda = torch.cuda.is_available()

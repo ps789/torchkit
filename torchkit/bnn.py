@@ -9,8 +9,8 @@ Created on Tue Apr 24 17:45:45 2018
 import numpy as np
 import torch
 import torch.nn as nn
-import nn as nn_
-import flows
+import torchkit.nn as nn_
+from torchkit import flows
 from torch.nn import functional as F
 from torch.nn.parameter import Parameter
 

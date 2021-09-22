@@ -14,8 +14,8 @@ import numpy as np
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
-import nn as nn_
-import flows
+import torchkit.nn as nn_
+from torchkit import flows
 import matplotlib.pyplot as plt
 
 from toy_energy import U2 as ef
