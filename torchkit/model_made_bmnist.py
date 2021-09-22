@@ -60,10 +60,10 @@ class model(object):
                 self.optim.step()
                 
                 if ((it + 1) % 10) == 0:
-                    print 'Epoch: [%2d] [%4d/%4d] loss: %.8f' % \
+                    print('Epoch: [%2d] [%4d/%4d] loss: %.8f' % \
                         (epoch+1, it+1, 
                          self.data_loader.dataset.__len__() // 32,
-                         loss.data[0])
+                         loss.data[0]))
                  
                 self.mdl.randomize()
 

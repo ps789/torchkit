@@ -9,7 +9,7 @@ Created on Fri Feb 23 23:59:31 2018
 
 import torch
 import matplotlib.pyplot as plt
-from optim import Adam
+from .optim import Adam
 import numpy as np
 
 import torch.nn as nn
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         adam.step()
 
         if i % 100 == 0:
-            print i, loss.data.numpy()[0]
+            print(i, loss.data.numpy()[0])
 
     N = 500
     xx = varify(np.linspace(x1,x2,N).astype('float32').reshape(N,1))

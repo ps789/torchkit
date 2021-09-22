@@ -114,4 +114,4 @@ if __name__ == '__main__':
             optim2.step()
             count += 1
             if count % print_every == 0:
-                print('[{}] {}'.format(e, loss))
+                print(('[{}] {}'.format(e, loss)))

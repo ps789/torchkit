@@ -180,7 +180,7 @@ class Parameters(nn.Module):
         dim = np.prod(size)
         spler = self.merged_sampler.register_sampler(
             flows.LinearFlow(dim, dimc, oper=nn.Linear))
-        print 'registering stochastic parameter of size {}'.format(size)
+        print('registering stochastic parameter of size {}'.format(size))
         return lambda: spler().contiguous().view(-1,*size) 
     
     def add_params_1(self, param):

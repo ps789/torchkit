@@ -15,7 +15,7 @@ import torch
 from torchkit.utils import bceloss
 
 tanh = nn.Tanh()
-print 'this is autoencoders'
+print('this is autoencoders')
 
 class MNISTConvEnc(nn.Module):
 

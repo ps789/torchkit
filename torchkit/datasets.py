@@ -4,9 +4,9 @@ Created on Sun Mar 19 16:47:13 2017
 @author: Chin-Wei
 """
 
-import helpers
+from . import helpers
 import os
-import cPickle as pickle
+import pickle as pickle
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 floatX = 'float32'
