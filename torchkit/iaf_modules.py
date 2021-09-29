@@ -24,13 +24,13 @@ N_ = None
 
 delta = 1e-6
 softplus_ = nn.Softplus()
-softplus = lambda x: softplus_(x) + delta 
+softplus = lambda x: softplus_(x) + delta
 
 
 tile = lambda x, r: np.tile(x,r).reshape(x.shape[0], x.shape[1]*r)
 
 
-# %------------ MADE ------------% 
+# %------------ MADE ------------%
 
 def get_rank(max_rank, num_out):
     rank_out = np.array([])
@@ -41,13 +41,13 @@ def get_rank(max_rank, num_out):
     rank_out = np.delete(rank_out,remove_ind)
     np.random.shuffle(rank_out)
     return rank_out.astype('float32')
-    
+
 
 def get_mask_from_ranks(r1, r2):
     return (r2[:, None] >= r1[None, :]).astype('float32')
 
 def get_masks_all(ds, fixed_order=False, derank=1):
-    # ds: list of dimensions dx, d1, d2, ... dh, dx, 
+    # ds: list of dimensions dx, d1, d2, ... dh, dx,
     #                       (2 in/output + h hidden layers)
     # derank only used for self connection, dim > 1
     dx = ds[0]
@@ -68,7 +68,6 @@ def get_masks_all(ds, fixed_order=False, derank=1):
               i in range(len(ds)-1)]
     if derank==1:
         assert np.all(np.diag(reduce(np.dot,ms[::-1])) == 0), 'wrong masks'
-    
     return ms, rx
 
 
@@ -89,21 +88,21 @@ class MADE(Module):
                  num_outlayers=1, activation=nn.ELU(), fixed_order=False,
                  derank=1):
         super(MADE, self).__init__()
-        
+
         oper = nn_.WNlinear
-        
+
         self.dim = dim
         self.hid_dim = hid_dim
         self.num_layers = num_layers
         self.num_outlayers = num_outlayers
         self.activation = activation
-        
-        
+
+
         ms, rx = get_masks(dim, hid_dim, num_layers, num_outlayers,
                            fixed_order, derank)
         ms = [m for m in map(torch.from_numpy, ms)]
         self.rx = rx
-        
+
         sequels = list()
         for i in range(num_layers-1):
             if i==0:
@@ -112,7 +111,7 @@ class MADE(Module):
             else:
                 sequels.append(oper(hid_dim, hid_dim, True, ms[i], False))
                 sequels.append(activation)
-                
+
         self.input_to_hidden = nn.Sequential(*sequels)
         self.hidden_to_output = oper(
                 hid_dim, dim*num_outlayers, True, ms[-1])
@@ -138,37 +137,35 @@ class cMADE(Module):
                  num_outlayers=1, activation=nn.ELU(), fixed_order=False,
                  derank=1):
         super(cMADE, self).__init__()
-        
+
         oper = nn_.CWNlinear
-        
+
         self.dim = dim
         self.hid_dim = hid_dim
         self.num_layers = num_layers
         self.context_dim = context_dim
         self.num_outlayers = num_outlayers
         self.activation = nn_.Lambda(lambda x: (activation(x[0]), x[1]))
-        
-        
+
+
         ms, rx = get_masks(dim, hid_dim, num_layers, num_outlayers,
                            fixed_order, derank)
         ms = [m for m in map(torch.from_numpy, ms)]
         self.rx = rx
-        
         sequels = list()
         for i in range(num_layers-1):
             if i==0:
-                sequels.append(oper(dim, hid_dim, context_dim, 
+                sequels.append(oper(dim, hid_dim, context_dim,
                                     ms[i], False))
                 sequels.append(self.activation)
             else:
-                sequels.append(oper(hid_dim, hid_dim, context_dim, 
+                sequels.append(oper(hid_dim, hid_dim, context_dim,
                                     ms[i], False))
                 sequels.append(self.activation)
-                
         self.input_to_hidden = nn.Sequential(*sequels)
         self.hidden_to_output = oper(
                 hid_dim, dim*num_outlayers, context_dim, ms[-1])
-        
+
 
     def forward(self, inputs):
         input, context = inputs
@@ -190,22 +187,15 @@ class cMADE(Module):
 
 
 if __name__ == '__main__':
-    
+
     inp = torch.autograd.Variable(
             torch.from_numpy(np.random.rand(2,784).astype('float32')))
     input = inp*2
     mdl = MADE(784, 1000, 3, 2)
     print((mdl(input).size()))
-    
+
     mdl = cMADE(784, 1000, 200, 3, 2)
     con = torch.autograd.Variable(
             torch.from_numpy(np.random.rand(2,200).astype('float32')))
     inputs = (input, con)
     print((mdl(inputs)[0].size()))
-    
-    
-    
-    
-    
-    
-    

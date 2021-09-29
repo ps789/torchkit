@@ -17,7 +17,7 @@ from torch.autograd import Variable
 from torchkit import iaf_modules
 from torchkit import utils
 import numpy as np
-
+from scipy.stats import norm
 
 sum_from_one = nn_.sum_from_one
 
@@ -184,7 +184,51 @@ class IAF(BaseFlow):
             x_ = (-std+2.0) * mean + std * x
         logdet_ = sum_from_one(torch.log(std)) + logdet
         return x_, logdet_, context
+class IAF_Quantile(BaseFlow):
 
+    def __init__(self, dim, hid_dim, context_dim, num_layers,
+                 activation=nn.ELU(), realify=nn_.sigmoid, fixed_order=False):
+        super(IAF, self).__init__()
+        self.realify = realify
+
+        self.dim = dim
+        self.context_dim = context_dim
+
+        if type(dim) is int:
+            self.mdl = iaf_modules.cMADE(
+                    dim, hid_dim, context_dim, num_layers, 2,
+                    activation, fixed_order)
+            self.reset_parameters()
+
+
+    def reset_parameters(self):
+        self.mdl.hidden_to_output.cscale.weight.data.uniform_(-0.001, 0.001)
+        self.mdl.hidden_to_output.cscale.bias.data.uniform_(0.0, 0.0)
+        self.mdl.hidden_to_output.cbias.weight.data.uniform_(-0.001, 0.001)
+        self.mdl.hidden_to_output.cbias.bias.data.uniform_(0.0, 0.0)
+        if self.realify == nn_.softplus:
+            inv = np.log(np.exp(1-nn_.delta)-1)
+            self.mdl.hidden_to_output.cbias.bias.data[1::2].uniform_(inv,inv)
+        elif self.realify == nn_.sigmoid:
+            self.mdl.hidden_to_output.cbias.bias.data[1::2].uniform_(2.0,2.0)
+
+
+    def forward(self, inputs):
+        x, logdet, context, alphas = inputs
+        out, _ = self.mdl((x, context))
+        if isinstance(self.mdl, iaf_modules.cMADE):
+            mean = out[:,:,0]
+            lstd = out[:,:,1]
+
+        std = self.realify(lstd)
+
+        if self.realify == nn_.softplus:
+            x_ = norm.ppf(alphas, mean, std)
+        elif self.realify == nn_.sigmoid:
+            x_ = norm.ppf(alphas, (-std+1.0) * mean, std)
+        elif self.realify == nn_.sigmoid2:
+            x_ = norm.ppf(alphas, (-std+2.0) * mean, std)
+        logdet_ = sum_from_one(torch.log(std)) + logdet
 
 class IAF_VP(BaseFlow):
 
