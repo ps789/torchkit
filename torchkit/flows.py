@@ -282,11 +282,11 @@ class IAF_Quantile(BaseFlow):
         std = self.realify(lstd)
 
         if self.realify == nn_.softplus:
-            x_ = mean + std * alphas
+            x_ = mean + std * torch.erfinv(alphas*2-1)
         elif self.realify == nn_.sigmoid:
-            x_ = (-std+1.0) * mean + std * alphas
+            x_ = (-std+1.0) * mean + std * torch.erfinv(alphas*2-1)
         elif self.realify == nn_.sigmoid2:
-            x_ = (-std+2.0) * mean + std * alphas
+            x_ = (-std+2.0) * mean + std * torch.erfinv(alphas*2-1)
         logdet_ = sum_from_one(torch.log(std)) + logdet
         return x_, logdet_, context, alphas
 class IAF_VP(BaseFlow):
