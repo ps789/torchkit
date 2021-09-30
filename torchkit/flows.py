@@ -111,7 +111,66 @@ class LinearFlow(BaseFlow):
         logdet_ = sum_from_one(torch.log(std)) + logdet
         return x_, logdet_, context
 
+class LinearFlow_Quantile(BaseFlow):
 
+    def __init__(self, dim, context_dim,
+                 oper=nn_.ResLinear, realify=nn_.softplus):
+        super(LinearFlow_Quantile, self).__init__()
+        self.realify = realify
+
+        self.dim = dim
+        self.context_dim = context_dim
+
+
+        if type(dim) is int:
+            dim_ = dim
+        else:
+            dim_ = np.prod(dim)
+
+        self.mean = oper(context_dim, dim_)
+        self.lstd = oper(context_dim, dim_)
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        if isinstance(self.mean, nn_.ResLinear):
+            self.mean.dot_01.scale.data.uniform_(-0.001, 0.001)
+            self.mean.dot_h1.scale.data.uniform_(-0.001, 0.001)
+            self.mean.dot_01.bias.data.uniform_(-0.001, 0.001)
+            self.mean.dot_h1.bias.data.uniform_(-0.001, 0.001)
+            self.lstd.dot_01.scale.data.uniform_(-0.001, 0.001)
+            self.lstd.dot_h1.scale.data.uniform_(-0.001, 0.001)
+            if self.realify == nn_.softplus:
+                inv = np.log(np.exp(1-nn_.delta)-1) * 0.5
+                self.lstd.dot_01.bias.data.uniform_(inv-0.001, inv+0.001)
+                self.lstd.dot_h1.bias.data.uniform_(inv-0.001, inv+0.001)
+            else:
+                self.lstd.dot_01.bias.data.uniform_(-0.001, 0.001)
+                self.lstd.dot_h1.bias.data.uniform_(-0.001, 0.001)
+        elif isinstance(self.mean, nn.Linear):
+            self.mean.weight.data.uniform_(-0.001, 0.001)
+            self.mean.bias.data.uniform_(-0.001, 0.001)
+            self.lstd.weight.data.uniform_(-0.001, 0.001)
+            if self.realify == nn_.softplus:
+                inv = np.log(np.exp(1-nn_.delta)-1) * 0.5
+                self.lstd.bias.data.uniform_(inv-0.001, inv+0.001)
+            else:
+                self.lstd.bias.data.uniform_(-0.001, 0.001)
+
+
+    def forward(self, inputs):
+        x, logdet, context, alphas = inputs
+        mean = self.mean(context)
+        lstd = self.lstd(context)
+        std = self.realify(lstd)
+
+        if type(self.dim) is int:
+            x_ = mean + std * alphas
+        else:
+            size = x.size()
+            x_ = mean.view(size) + std.view(size) * x
+        logdet_ = sum_from_one(torch.log(std)) + logdet
+        return x_, logdet_, context
 class BlockAffineFlow(Module):
     # NICE, volume preserving
     # x2' = x2 + nonLinfunc(x1)
@@ -188,7 +247,7 @@ class IAF_Quantile(BaseFlow):
 
     def __init__(self, dim, hid_dim, context_dim, num_layers,
                  activation=nn.ELU(), realify=nn_.sigmoid, fixed_order=False):
-        super(IAF, self).__init__()
+        super(IAF_Quantile, self).__init__()
         self.realify = realify
 
         self.dim = dim
@@ -223,13 +282,13 @@ class IAF_Quantile(BaseFlow):
         std = self.realify(lstd)
 
         if self.realify == nn_.softplus:
-            x_ = norm.ppf(alphas, mean, std)
+            x_ = mean + std * alphas
         elif self.realify == nn_.sigmoid:
-            x_ = norm.ppf(alphas, (-std+1.0) * mean, std)
+            x_ = (-std+1.0) * mean + std * alphas
         elif self.realify == nn_.sigmoid2:
-            x_ = norm.ppf(alphas, (-std+2.0) * mean, std)
+            x_ = (-std+2.0) * mean + std * alphas
         logdet_ = sum_from_one(torch.log(std)) + logdet
-
+        return x_, logdet_, context, alphas
 class IAF_VP(BaseFlow):
 
     def __init__(self, dim, hid_dim, context_dim, num_layers,
